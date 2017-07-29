@@ -146,7 +146,6 @@ public class TestHook implements IXposedHookLoadPackage {
                                 Cipher cip = (Cipher)param.thisObject;
                                 if(param.args.length >= 1)
                                 {
-
                                     String str = cip.getAlgorithm() + " Data:";
                                     Util.MyLog(loadPackageParam.packageName,str,(byte[])param.args[0]);
 

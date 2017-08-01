@@ -46,9 +46,7 @@ public class TestHook implements IXposedHookLoadPackage {
             XposedBridge.log(logstr);
 
             try {
-              //  XposedHelpers.findAndHookMethod("java.security.MessageDigest",loadPackageParam.classLoader,"digest",byte[].class,new HookMessageDigest(loadPackageParam.packageName));
 
-            //    HookCiperAll.initHookAll(loadPackageParam);
                 XposedBridge.hookAllConstructors(XposedHelpers.findClass("javax.crypto.spec.DESKeySpec", loadPackageParam.classLoader), new XC_MethodHook() {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -167,7 +165,6 @@ public class TestHook implements IXposedHookLoadPackage {
 
                             str = md.getAlgorithm() + "  result:";
                             Util.MyLog(loadPackageParam.packageName,str,(byte[])param.getResult());
-
                         }
                     }
                 });
@@ -198,8 +195,7 @@ class Util {
 
     public  static void MyLog(String packname,String info,byte[] data)
     {
-        Log.d("q_"+packname,info);
-        XposedBridge.log("["+ packname+"]"+info);
+
 
 
         String path = "/sdcard/ydsec/";
@@ -212,11 +208,12 @@ class Util {
         {
             info = info + "\n";
             info = info + HexDumper.dumpHexString(data) + "\n------------------------------------------------------------------------------------------------------------------------\n\n";
-
             FileWriter fw = new FileWriter(filename, true);
             fw.write(info);
             fw.close();
 
+            Log.d("q_"+packname,info);
+            XposedBridge.log("["+ packname+"]"+info);
 
         }catch(IOException e)
         {

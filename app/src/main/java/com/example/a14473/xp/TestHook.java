@@ -9,12 +9,17 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.HashMap;
 import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.spec.KeySpec;
+import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.Objects;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -34,12 +39,13 @@ import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 import com.example.a14473.xp.HexDumper;
 
+
 /**
  * Created by 14473 on 2017/7/2.
  */
 public class TestHook implements IXposedHookLoadPackage {
-    private  String packName = "com.cdel.med.moblieClass.phone";
-    private  String clasName = "com.example.a14473.testapp.MainActivity";
+
+
     @Override
     public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         String logstr  = " W:" + loadPackageParam.processName + "  "+loadPackageParam.packageName;
@@ -106,7 +112,7 @@ public class TestHook implements IXposedHookLoadPackage {
                         System.arraycopy((byte[])param.args[0],offset,data,0,size);
 
                         String str ;
-                        str = Algorithm+" Key";
+                        str = Algorithm + " Key";
                         Util.MyLog(loadPackageParam.packageName,str,data);
                     }
                 });
@@ -147,11 +153,23 @@ public class TestHook implements IXposedHookLoadPackage {
                                     String str = cip.getAlgorithm() + " Data:";
                                     Util.MyLog(loadPackageParam.packageName,str,(byte[])param.args[0]);
 
-                                    str = cip.getAlgorithm()+"  result:";
+                                    str = cip.getAlgorithm() + "  result:";
                                     Util.MyLog(loadPackageParam.packageName,str,(byte[])param.getResult());
                                 }
                             }
                         });
+
+                XposedBridge.hookAllMethods(XposedHelpers.findClass("java.security.MessageDigest",loadPackageParam.classLoader), "update", new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        MessageDigest md = (MessageDigest)param.thisObject;
+                        String str = md.getAlgorithm() + " update data:";
+                        Util.MyLog(loadPackageParam.packageName,str,(byte[])param.args[0]);
+
+                    }
+                });
+
                 XposedBridge.hookAllMethods(XposedHelpers.findClass("java.security.MessageDigest", loadPackageParam.classLoader), "digest", new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -159,6 +177,7 @@ public class TestHook implements IXposedHookLoadPackage {
                         if (param.args.length >= 1)
                         {
                             MessageDigest md = (MessageDigest)param.thisObject;
+
                             String str;
                             str = md.getAlgorithm() + "  data:";
                             Util.MyLog(loadPackageParam.packageName,str,(byte[])param.args[0]);
@@ -193,20 +212,46 @@ class Util {
         return hs.toUpperCase(); //转成大写
     }
 
+    public static String GetStack()
+    {
+        String result = "";
+        Throwable ex = new Throwable();
+        StackTraceElement[] stackElements = ex.getStackTrace();
+        if (stackElements != null) {
+
+            int range_start = 5;
+            int range_end = Math.min(stackElements.length,7);
+            if(range_end < range_start)
+                return  "";
+
+            for (int i = range_start; i < range_end; i++) {
+
+                result = result + (stackElements[i].getClassName()+"->");
+                result = result + (stackElements[i].getMethodName())+"  ";
+                result = result + (stackElements[i].getFileName()+"(");
+                result = result + (stackElements[i].getLineNumber()+")\n");
+                result = result + ("-----------------------------------\n");
+            }
+        }
+        return result;
+    }
+
     public  static void MyLog(String packname,String info,byte[] data)
     {
-
-
 
         String path = "/sdcard/ydsec/";
         File pather = new File(path);
         if(!pather.exists())
              pather.mkdir();
 
-        String filename = path+packname+".txt";
+        String filename = path + packname+".txt";
+
+        if(data.length >= 256)
+            return;
         try
         {
             info = info + "\n";
+            info = info + GetStack() + "\n";
             info = info + HexDumper.dumpHexString(data) + "\n------------------------------------------------------------------------------------------------------------------------\n\n";
             FileWriter fw = new FileWriter(filename, true);
             fw.write(info);

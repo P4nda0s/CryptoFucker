@@ -9,4 +9,17 @@ Xposed框架，用于抓取javax.crypto.* 与 javax.security.* 算法参数（�
 
 建议使用Notepad++查看数据文件。
 
+## 优势
 
+- 支持 javax.crypto.*  大部分函数
+- 支持 javax.security.*大部分函数
+- IV向量嗅探
+- 密钥嗅探
+- 加密原始数据嗅探
+- 加密结果嗅探
+- 调用栈显示
+- HEX 显示
+
+## 数据文件样例说明
+
+样例数据在example目录。

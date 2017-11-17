@@ -10,7 +10,20 @@ public class HexDumper
         if (array.equals(null))
             return "null";
 
-        return dumpHexString(array, 0, array.length);
+        byte[] byte2 = new byte[array.length + 0x10];
+        for(int i = 0;i < byte2.length ;i++)
+        {
+            byte2[i] = 0;
+        }
+
+        // --* . *--
+        for(int i=0;i<array.length;i++)
+        {
+            byte2[i] = array[i];
+        }
+
+
+        return dumpHexString(byte2, 0, byte2.length);
     }
 
     public static String dumpHexString(byte[] array, int offset, int length)

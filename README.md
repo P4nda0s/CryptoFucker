@@ -1,5 +1,7 @@
 # CryptoFucker
 
+QQ 群：471525564
+
 For English version of README, drag the page down
 
 Xposed框架，用于抓取javax.crypto.* 与 javax.security.* 算法参数（包括加密数据、密钥、IV、结果等数据）的工具。
